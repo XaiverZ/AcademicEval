@@ -1,7 +1,7 @@
 # AcademicEval: Live Long-Context LLM Benchmark
 
 
-![Method](./model.png)
+<div align=center> <img src="./model.png" width = 85% height="85%"/> </div>
 
 
 **You can download our collected data at [AcademicEval-HF](https://huggingface.co/datasets/AcademicEval/AcademicEval)**
@@ -25,17 +25,6 @@ pip install faiss-gpu
 pip install openai==0.28.0
 ```
 
-### Model Weights
-
-The following is the model weight download address needed in the experiment:
-- [Contriever](https://huggingface.co/facebook/contriever)
-- [BERT-Base-Uncased](https://huggingface.co/google-bert/bert-base-uncased)
-- [RoBERTa](https://huggingface.co/FacebookAI/roberta-large)
-- [BART](https://huggingface.co/facebook/bart-large-cnn)
-- [DeBERTa](https://huggingface.co/microsoft/deberta-xlarge-mnli)
-
-You can download them as needed to conduct corresponding experiments.
-
 
 ### LLM Tokenizers
 
@@ -46,28 +35,67 @@ We additionally need the tokenizer configuration files for LLMs to ensure correc
 - [Mixtral](https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1)
 - [Nous Hermes](https://huggingface.co/NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO)
 
-You only need to download the tokenizer configuration files for each LLM, no model weight files are needed, because we access LLMs through the API.
-
+You only need to download the tokenizer configuration files for each LLM, no model weight files are needed, because we access LLMs through the API. Please place the downloaded files in "gemma", "llama", "qwen", "mixtral", and "hermes" directories, respectively. 
 
 
 
 ## Experiments
 
-**Note: Since we use the LLM API provided by [together.ai](https://www.together.ai/) to access LLMs, you need to prepare your own API KEY.**
+**Note: Since we use the LLM API provided by [together.ai](https://www.together.ai/) to access LLMs, you need to prepare your own API KEY in the "get_llm_response_via_api" function in utils.py**
 
-Some script examples are shown below:
+Please ensure that the AcademicEval is downloaded in the "AcademicEval" directory. The path should be like the following:
 
+
+├── README.md
+├── abs_extractor.py
+├── bart_score.py
+├── construct_relation_graph.py
+├── exp_comparison.py
+├── main.py
+├── model.png
+├── refine_graph.py
+├── related_extractor.py
+├── retrieval.py
+├── section_region_extractor.py
+├── utils.py
+├── gemma
+│   ├── ...
+├── llama
+│   ├── ...
+├── qwen
+│   ├── ...
+├── mixtral
+│   ├── ...
+├── hermes
+│   ├── ...
+├── AcademicEval
+│   ├── abs_9K
+│   ├── abs_28K
+│   ├── abs_29K_G
+│   ├── intro_8K
+│   ├── intro_28K
+│   ├── intro_28K_G
+│   ├── related_34K
+│   ├── related_53K
+│   ├── related_53K_G
+│   ├── title_10K
+│   ├── title_30K
+│   └── title_31K_G
+
+
+
+**Here are some command examples, you can run all the experiments by replacing "llm_model" and "setting", or adding "--rag" and "--retriever"**
 
 ```bash
 # title-10K
-python exp_comparison.py --setting title_short --llm_model google/gemma-7b-it --cuda 3
+python exp_comparison.py --setting title_10K --llm_model google/gemma-7b-it --cuda 3
+# title-10K w/ RALM
+python exp_comparison.py --setting title_10K --llm_model google/gemma-7b-it --cuda 3 --rag  --retriever contriever
 # title-30K
-python exp_comparison.py --setting title_long --llm_model Qwen/Qwen1.5-72B-Chat --cuda 3
+python exp_comparison.py --setting title_30K --llm_model Qwen/Qwen1.5-72B-Chat --cuda 3
 # title-31K-G
-python exp_comparison.py --setting title_long_graph --llm_model Qwen/Qwen1.5-72B-Chat --cuda 3
+python exp_comparison.py --setting title_31K_G --llm_model Qwen/Qwen1.5-72B-Chat --cuda 3
 ```
-
-
 
 
 

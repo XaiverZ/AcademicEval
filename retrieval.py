@@ -14,18 +14,18 @@ from utils import show_time
 
 def get_dense_retriever(retriever):
     if retriever == 'contriever':
-        query_tokenizer = ctx_tokenizer = AutoTokenizer.from_pretrained('../G4M/contriever')
-        query_encoder = ctx_encoder = AutoModel.from_pretrained('../G4M/contriever')
+        query_tokenizer = ctx_tokenizer = AutoTokenizer.from_pretrained('facebook/contriever')
+        query_encoder = ctx_encoder = AutoModel.from_pretrained('facebook/contriever')
     elif retriever == 'dpr':
-        query_tokenizer = DPRQuestionEncoderTokenizer.from_pretrained("../G4M/dpr-question_encoder-single-nq-base")
-        query_encoder = DPRQuestionEncoder.from_pretrained("../G4M/dpr-question_encoder-single-nq-base")
-        ctx_tokenizer = DPRContextEncoderTokenizer.from_pretrained('../G4M/dpr-ctx_encoder-single-nq-base')
-        ctx_encoder = DPRContextEncoder.from_pretrained('../G4M/dpr-ctx_encoder-single-nq-base')
+        query_tokenizer = DPRQuestionEncoderTokenizer.from_pretrained("facebook/dpr-question_encoder-single-nq-base")
+        query_encoder = DPRQuestionEncoder.from_pretrained("facebook/dpr-question_encoder-single-nq-base")
+        ctx_tokenizer = DPRContextEncoderTokenizer.from_pretrained('facebook/dpr-ctx_encoder-single-nq-base')
+        ctx_encoder = DPRContextEncoder.from_pretrained('facebook/dpr-ctx_encoder-single-nq-base')
     elif retriever == 'dragon':
-        query_tokenizer = AutoTokenizer.from_pretrained('../G4M/dragon-plus-query-encoder')
-        query_encoder = AutoModel.from_pretrained('../G4M/dragon-plus-query-encoder')
-        ctx_tokenizer = AutoTokenizer.from_pretrained('../G4M/dragon-plus-context-encoder')
-        ctx_encoder = AutoModel.from_pretrained('../G4M/dragon-plus-context-encoder')
+        query_tokenizer = AutoTokenizer.from_pretrained('facebook/dragon-plus-query-encoder')
+        query_encoder = AutoModel.from_pretrained('facebook/dragon-plus-query-encoder')
+        ctx_tokenizer = AutoTokenizer.from_pretrained('facebook/dragon-plus-context-encoder')
+        ctx_encoder = AutoModel.from_pretrained('facebook/dragon-plus-context-encoder')
     else:
         raise Exception("Error")
 

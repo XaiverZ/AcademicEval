@@ -76,7 +76,7 @@ def set_seed(seed=42):
 
 def get_llm_response_via_api(prompt,
                              API_BASE="https://api.together.xyz",
-                             API_KEY="YOUR API KEY",
+                             API_KEY="[YOUR API KEY HERE]",
                              LLM_MODEL="mistralai/Mixtral-8x7B-Instruct-v0.1",
                              TAU=1.0,
                              TOP_P=1.0,

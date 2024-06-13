@@ -196,34 +196,34 @@ def rag_query_prompt(setting, info):
     return prompt
 
 
-def bart_score_eval(generate_response, ground_truth):
-    if not isinstance(ground_truth[0], str):
-        num_ref = len(ground_truth[0])
-        generate_response_expand = []
-        ground_truth_expand = []
-        for i, j in zip(generate_response, ground_truth):
-            generate_response_expand.extend([i] * num_ref)
-            ground_truth_expand.extend(j)
-
-        bart_scorer = BARTScorer(device=DEVICE, checkpoint='bart-large-cnn')
-        res_1 = bart_scorer.score(generate_response_expand, ground_truth_expand, batch_size=8)
-        bart_scorer.load(path='bart_score.pth')
-        res_2 = bart_scorer.score(generate_response_expand, ground_truth_expand, batch_size=8)
-
-        res_1_narrow = []
-        res_2_narrow = []
-        for i in range(len(generate_response)):
-            res_1_narrow.append(max(res_1[i * num_ref: (i + 1) * num_ref]))
-            res_2_narrow.append(max(res_2[i * num_ref: (i + 1) * num_ref]))
-
-        return [float(i) for i in res_1_narrow], [float(i) for i in res_2_narrow]
-    else:
-        bart_scorer = BARTScorer(device=DEVICE, checkpoint='bart-large-cnn')
-        res_1 = bart_scorer.score(generate_response, ground_truth, batch_size=8)
-        bart_scorer.load(path='bart_score.pth')
-        res_2 = bart_scorer.score(generate_response, ground_truth, batch_size=8)
-
-        return [float(i) for i in res_1], [float(i) for i in res_2]
+# def bart_score_eval(generate_response, ground_truth):
+#     if not isinstance(ground_truth[0], str):
+#         num_ref = len(ground_truth[0])
+#         generate_response_expand = []
+#         ground_truth_expand = []
+#         for i, j in zip(generate_response, ground_truth):
+#             generate_response_expand.extend([i] * num_ref)
+#             ground_truth_expand.extend(j)
+#
+#         bart_scorer = BARTScorer(device=DEVICE, checkpoint='bart-large-cnn')
+#         res_1 = bart_scorer.score(generate_response_expand, ground_truth_expand, batch_size=8)
+#         bart_scorer.load(path='bart_score.pth')
+#         res_2 = bart_scorer.score(generate_response_expand, ground_truth_expand, batch_size=8)
+#
+#         res_1_narrow = []
+#         res_2_narrow = []
+#         for i in range(len(generate_response)):
+#             res_1_narrow.append(max(res_1[i * num_ref: (i + 1) * num_ref]))
+#             res_2_narrow.append(max(res_2[i * num_ref: (i + 1) * num_ref]))
+#
+#         return [float(i) for i in res_1_narrow], [float(i) for i in res_2_narrow]
+#     else:
+#         bart_scorer = BARTScorer(device=DEVICE, checkpoint='bart-large-cnn')
+#         res_1 = bart_scorer.score(generate_response, ground_truth, batch_size=8)
+#         bart_scorer.load(path='bart_score.pth')
+#         res_2 = bart_scorer.score(generate_response, ground_truth, batch_size=8)
+#
+#         return [float(i) for i in res_1], [float(i) for i in res_2]
 
 
 def bert_score_eval(generate_response, ground_truth, opt=0):
@@ -272,7 +272,7 @@ def response_eval(generate_responses, ground_truthes, file_identifiers):
     metric_list = []
     bert_Ps, bert_Rs, bert_Fs = bert_score_eval(generate_responses, ground_truthes, opt=0)
     bert_ms_Ps, bert_ms_Rs, bert_ms_Fs = bert_score_eval(generate_responses, ground_truthes, opt=1)
-    bart_res_1s, bart_res_2s = bart_score_eval(generate_responses, ground_truthes)
+    # bart_res_1s, bart_res_2s = bart_score_eval(generate_responses, ground_truthes)
 
     for ind, (generate_response, ground_truth, file_identifier) in enumerate(tqdm(zip(generate_responses, ground_truthes, file_identifiers))):
         metrics = dict()
@@ -282,7 +282,7 @@ def response_eval(generate_responses, ground_truthes, file_identifiers):
 
         metrics["BERT SCORE"] = {"P": bert_Ps[ind], "R": bert_Rs[ind], "F": bert_Fs[ind]}
         metrics["BERT SCORE MS"] = {"P": bert_ms_Ps[ind], "R": bert_ms_Rs[ind], "F": bert_ms_Fs[ind]}
-        metrics["BART SCORE"] = {"RES1": bart_res_1s[ind], "RES2": bart_res_2s[ind]}
+        # metrics["BART SCORE"] = {"RES1": bart_res_1s[ind], "RES2": bart_res_2s[ind]}
         metrics["ROUGE-L"] = {"P": rouge_L_P, "R": rouge_L_R, "F": rouge_L_F}
         metrics["ROUGE-1"] = {"P": rouge_1_P, "R": rouge_1_R, "F": rouge_1_F}
         metrics["ROUGE-2"] = {"P": rouge_2_P, "R": rouge_2_R, "F": rouge_2_F}
@@ -507,10 +507,6 @@ def eval_title_long_graph(sample, llm_model, rag):
     return response.replace("Sure, here is the title", ""), gt
 
 
-def eval_title_long_mix(sample, llm_model, rag):
-    raise NotImplementedError
-
-
 def eval_abstract_short(sample, llm_model, rag):
     gt = sample["gt"]
     prompt = start_prompt_instruction(setting="abstract_short", target_only=True)
@@ -643,10 +639,6 @@ def eval_abstract_long_graph(sample, llm_model, rag):
     print(response)
 
     return response, gt
-
-
-def eval_abstract_long_mix(sample, llm_model, rag):
-    raise NotImplementedError
 
 
 def eval_introduction_short(sample, llm_model, rag):
@@ -792,10 +784,6 @@ def eval_introduction_long_graph(sample, llm_model, rag):
     print(response)
 
     return response, gt
-
-
-def eval_introduction_long_mix(sample, llm_model, rag):
-    raise NotImplementedError
 
 
 def eval_related_short(sample, llm_model, rag):
@@ -974,11 +962,6 @@ def eval_related_long_graph(sample, llm_model, rag):
     return response, gt
 
 
-def eval_related_long_mix(sample, llm_model, rag):
-    raise NotImplementedError
-
-
-
 def exp_llm(setting, llm_model, rag):
     root = "./AcademicEval"
     result_recorder = dict()
@@ -992,10 +975,7 @@ def exp_llm(setting, llm_model, rag):
     generated_responses = []
     ground_truthes = []
     file_identifiers = []
-    test_info_path = os.path.join(root, setting.split("_")[0] + "_short", "test.txt")
-    with open(test_info_path, "r", encoding="utf-8") as f:
-        test_files = f.readlines()
-    test_files = ["{}_{}".format("_".join(setting.split("_")[:2]), i.strip()) for i in test_files]
+    test_files = [i for i in os.listdir(os.path.join(root, setting)) if i.find("test") != -1 and i.endswith("json")]
     for ind, test_file in enumerate(tqdm(test_files)):
         if ind == 142 or ind == 417:
             continue
@@ -1007,70 +987,54 @@ def exp_llm(setting, llm_model, rag):
         test_file_path = os.path.join(root, setting, test_file)
         with open(test_file_path, 'r', encoding='utf-8') as f:
             sample = json.load(f)
-        if setting == "title_short":
+        if setting == "title_10K":
             response, gt = eval_title_short(sample=sample,
                                             llm_model=llm_model,
                                             rag=rag)
-        elif setting == "title_long":
+        elif setting == "title_30K":
             response, gt = eval_title_long(sample=sample, 
                                            llm_model=llm_model, 
                                            rag=rag)
-        elif setting == "title_long_graph":
+        elif setting == "title_31K_G":
             response, gt = eval_title_long_graph(sample=sample, 
                                                  llm_model=llm_model, 
                                                  rag=rag)
-        elif setting == "title_long_mix":
-            response, gt = eval_title_long_mix(sample=sample, 
-                                               llm_model=llm_model, 
-                                               rag=rag)
-        elif setting == "abstract_short":
+        elif setting == "abs_9K":
             response, gt = eval_abstract_short(sample=sample,
                                                llm_model=llm_model,
                                                rag=rag)
-        elif setting == "abstract_long":
+        elif setting == "abs_28K":
             response, gt = eval_abstract_long(sample=sample,
                                               llm_model=llm_model,
                                               rag=rag)
-        elif setting == "abstract_long_graph":
+        elif setting == "abs_29K_G":
             response, gt = eval_abstract_long_graph(sample=sample,
                                                     llm_model=llm_model,
                                                     rag=rag)
-        elif setting == "abstract_long_mix":
-            response, gt = eval_abstract_long_mix(sample=sample,
-                                                  llm_model=llm_model,
-                                                  rag=rag)
-        elif setting == "introduction_short":
+        elif setting == "intro_8K":
             response, gt = eval_introduction_short(sample=sample,
                                                    llm_model=llm_model,
                                                    rag=rag)
-        elif setting == "introduction_long":
+        elif setting == "intro_28K":
             response, gt = eval_introduction_long(sample=sample,
                                                   llm_model=llm_model,
                                                   rag=rag)
-        elif setting == "introduction_long_graph":
+        elif setting == "intro_28K_G":
             response, gt = eval_introduction_long_graph(sample=sample,
                                                         llm_model=llm_model,
                                                         rag=rag)
-        elif setting == "introduction_long_mix":
-            response, gt = eval_introduction_long_mix(sample=sample,
-                                                      llm_model=llm_model,
-                                                      rag=rag)
-        elif setting == "related_short":
+        elif setting == "related_34K":
             response, gt = eval_related_short(sample=sample,
                                               llm_model=llm_model,
                                               rag=rag)
-        elif setting == "related_long":
+        elif setting == "related_53K":
             response, gt = eval_related_long(sample=sample,
                                              llm_model=llm_model,
                                              rag=rag)
-        elif setting == "related_long_graph":
+        elif setting == "related_53K_G":
             response, gt = eval_related_long_graph(sample=sample,
                                                    llm_model=llm_model,
                                                    rag=rag)
-        elif setting == "related_long_mix":
-            response, gt = eval_related_long_mix(sample=sample,
-                                                 llm_model=llm_model,
-                                                 rag=rag)
         else:
             raise Exception("Setting Not Exist.")
 
@@ -1116,16 +1080,12 @@ def get_tokenizer(llm_model):
     elif llm_model == "mistralai/Mixtral-8x22B-Instruct-v0.1":
         return AutoTokenizer.from_pretrained("./mixtral")
     else:
-        return AutoTokenizer.from_pretrained("./bert-base-uncased")
+        return AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--setting", type=str, required=True,
-                        choices=["title_short", "title_long", "title_long_graph", "title_long_mix",
-                                 "abstract_short", "abstract_long", "abstract_long_graph", "abstract_long_mix",
-                                 "introduction_short", "introduction_long", "introduction_long_graph", "introduction_long_mix",
-                                 "related_short", "related_long", "related_long_graph", "related_long_mix"])
+    parser.add_argument("--setting", type=str, required=True)
     parser.add_argument("--llm_model", type=str, default="mistralai/Mixtral-8x7B-Instruct-v0.1")
     parser.add_argument('--rag', action='store_true')
     parser.add_argument("--seed", type=int, default=42)
