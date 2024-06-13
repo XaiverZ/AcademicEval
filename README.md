@@ -45,7 +45,7 @@ You only need to download the tokenizer configuration files for each LLM, no mod
 
 Please ensure that the AcademicEval is downloaded in the "AcademicEval" directory. The path should be like the following:
 
-
+```bash
 ├── README.md
 ├── abs_extractor.py
 ├── bart_score.py
@@ -81,7 +81,7 @@ Please ensure that the AcademicEval is downloaded in the "AcademicEval" director
 │   ├── title_10K
 │   ├── title_30K
 │   └── title_31K_G
-
+```
 
 
 **Here are some command examples, you can run all the experiments by replacing "llm_model" and "setting", or adding "--rag" and "--retriever"**
