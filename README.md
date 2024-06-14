@@ -80,18 +80,9 @@ Comparing to existing long-context LLM benchmarks, our Comparing to existing lon
     </tr>
   </tbody>
 </table>
-<style>
-  .comparison-table td:nth-child(3) span {
-    color: green;
-  }
-  .comparison-table td:nth-child(4) span {
-    color: red;
-  }
-  .comparison-table td {
-  text-align: center;
-}
-</style>
 
+
+<!-- 🔥❗✅❎ -->
 
 **❗❗❗You can download our collected data at [AcademicEval-HF](https://huggingface.co/datasets/AcademicEval/AcademicEval)**
 
