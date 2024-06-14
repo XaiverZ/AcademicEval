@@ -9,6 +9,7 @@ import time
 from transformers import AutoTokenizer, AutoModel
 
 from utils import *
+from download import download
 
 warnings.filterwarnings('ignore')
 
@@ -163,13 +164,6 @@ def prun_graph(data):
 
 
 def generate_download_data(data):
-    # author_list = [i for i in data["node_feat"]]
-    # remove_authors = author_list[len(author_list) // 2:]
-    # remove_authors = author_list[:len(author_list) // 2]
-    # for key in remove_authors:
-    #     del data["node_feat"][key]
-
-    data = refine_graph(data)
     url_list = []
     for k, v in data["node_feat"].items():
         for sub_v in v:
@@ -177,32 +171,11 @@ def generate_download_data(data):
 
     return url_list
 
-    # print(len(url_list))
-    # with open("./{}".format(output_name), "w", encoding='utf-8') as f:
-    #     for url in url_list:
-    #         f.write(url)
-    #         f.write('\n')
 
 
 def integrate(data):
-    with open('./AcademicEval/co_author/main_text_1.pkl', 'rb') as f:
-        main_data_1 = pickle.load(f)
-    with open('./AcademicEval/co_author/main_text_2.pkl', 'rb') as f:
-        main_data_2 = pickle.load(f)
-    with open('./AcademicEval/co_author/main_text_3.pkl', 'rb') as f:
-        main_data_3 = pickle.load(f)
-    with open('./AcademicEval/co_author/main_text_4.pkl', 'rb') as f:
-        main_data_4 = pickle.load(f)
-
-    main_data = dict()
-    for k, v in main_data_1.items():
-        main_data[k] = v
-    for k, v in main_data_2.items():
-        main_data[k] = v
-    for k, v in main_data_3.items():
-        main_data[k] = v
-    for k, v in main_data_4.items():
-        main_data[k] = v
+    with open('./AcademicEval/co_author/main_text_all.pkl', 'rb') as f:
+        main_data = pickle.load(f)
 
     remove_authors = set()
     for ind, k in enumerate(data["node_feat"]):
@@ -392,161 +365,28 @@ def stats_multi_len(data, setting="abstract", hop=2):
     print("Co-author Graph {} Multi: in_len/out_len=={}/{}".format(setting.title(), np.mean(in_len), np.mean(out_len)))
 
 
-def check_validaty():
-    e_cnt = 0
-    u_cnt = 0
-    url_list_all = []
-    error_cases_all = []
-    for i in range(10):
-        # if i != 0:
-        #     continue
-        with open('./subgraph_{}.pkl'.format(i), 'rb') as f:
-            data = pickle.load(f)
-        url_list = []
-        error_cases = []
-        for k, v in data.items():
-            if len(v) == 0 or len(v["graph"]) == 0:
-                print("error", k)
-                error_cases.append(k)
-                continue
-            data[k] = refine_graph(v)
-            if not check_connectivity(data[k]):
-                data[k] = get_max_connect_part(data[k], node_idx=0)
-            stats(data[k])
-            url_list.extend(generate_download_data(data[k]))
-
-        e_cnt += len(error_cases)
-        u_cnt += len(url_list)
-        url_list_all.extend(url_list)
-        error_cases_all.extend(error_cases)
-        with open("./ids_{}.txt".format(i), "w", encoding='utf-8') as f:
-            for url in url_list:
-                f.write(url)
-                f.write('\n')
-
-
-    print(e_cnt, u_cnt)
-    print(len(set(error_cases_all)), len(set(url_list_all)))
-
-    title = [i.split("_")[-1].replace(".json", "") for i in os.listdir("./AcademicEval/title_short")]
-    abs = [i.split("_")[-1].replace(".json", "") for i in os.listdir("./AcademicEval/abstract_short")]
-    intro = [i.split("_")[-1].replace(".json", "") for i in os.listdir("./AcademicEval/introduction_short")]
-    related = [i.split("_")[-1].replace(".json", "") for i in os.listdir("./AcademicEval/related_short")]
-
-    print(len(set(error_cases_all) & set(title)))
-    print(len(set(error_cases_all) & set(abs)))
-    print(len(set(error_cases_all) & set(intro)))
-    print(len(set(error_cases_all) & set(related)))
-
-
-    # with open("./ids_all.txt", "w", encoding='utf-8') as f:
-    #     for url in set(url_list_all):
-    #         f.write(url)
-    #         f.write('\n')
-
-
-def integrate_new():
-    subgraph_all = dict()
-    for i in range(10):
-        with open('./subgraph_{}.pkl'.format(i), 'rb') as f:
-            data = pickle.load(f)
-        for k, v in data.items():
-            if len(v) == 0 or len(v["graph"]) == 0:
-                subgraph_all[k] = {}
-                continue
-            data[k] = refine_graph(v)
-            if not check_connectivity(data[k]):
-                data[k] = get_max_connect_part(data[k], node_idx=0)
-            subgraph_all[k] = data[k]
-
-
-    with open('./main_text_all_tmp.pkl', 'rb') as f:
-        main_data = pickle.load(f)
-    with open('./main_text_all_tmp_tmp.pkl', 'rb') as f:
-        sub_main_data = pickle.load(f)
-
-    for k, v in sub_main_data.items():
-        if k not in main_data:
-            main_data[k] = v
-
-    # for k, v in main_data.items():
-    #     if k.find("arxiv") == -1:
-    #         print(1)
-
-    subgraph_all_filled = dict()
-    for arxiv_id, data in subgraph_all.items():
-        if len(data) == 0:
-            subgraph_all_filled[arxiv_id] = data
-            continue
-        remove_authors = set()
-        for ind, k in enumerate(data["node_feat"]):
-            new_v = []
-            for sub_ind, paper_info in enumerate(data["node_feat"][k]):
-                # print(data["node_feat"][k][sub_ind]["url"].split("/")[-1])
-                if data["node_feat"][k][sub_ind]["url"] in main_data:
-                    for kk, vv in main_data[data["node_feat"][k][sub_ind]["url"]].items():
-                        data["node_feat"][k][sub_ind][kk] = vv
-                    new_v.append(data["node_feat"][k][sub_ind])
-
-            if len(new_v) == 0:
-                remove_authors.add(k)
-            data["node_feat"][k] = new_v
-
-        remove_eid = []
-        for eid, edge in enumerate(data["graph"]):
-            a1 = edge[0]
-            a2 = edge[1]
-            if a1 in remove_authors or a2 in remove_authors:
-                remove_eid.append(eid)
-
-        # print(len(data["graph"]))
-        [data["graph"].pop(index) for index in sorted(remove_eid, reverse=True)]
-        # print(len(data["graph"]))
-
-        [data["node_feat"].pop(index) for index in remove_authors]
-
-        if len(data["node_feat"]) == 0:
-            subgraph_all_filled[arxiv_id] = {}
-            continue
-
-        if not check_connectivity(data):
-            data = get_max_connect_part(data, node_idx=0)
-        stats(data)
-
-        subgraph_all_filled[arxiv_id] = data
-
-    write_to_pkl(subgraph_all_filled, "./subgraph_refine.pkl")
-
-
-
 if __name__ == '__main__':
-    integrate_new()
-    # check_validaty()
-    # with open('./AcademicEval/co_author/graph.pkl', 'rb') as f:
-    #     data = pickle.load(f)
-    #
-    # data = refine_graph(data)
-    # stats(data)
-    # print(check_connectivity(data))
-    # # generate_download_data(data)
-    # data = prun_graph(data)
-    # stats(data)
-    # print(check_connectivity(data))
-    # data = integrate(data)
-    # stats(data)
-    # print(check_connectivity(data))
-    # print(get_all_connect_part(data))
-    # data = get_max_connect_part(data, node_idx=0)
-    # print("\nFinal\n")
-    # stats(data)
-    # print(check_connectivity(data))
-    # write_to_pkl(data, "./AcademicEval/co_author/graph_refine.pkl")
+    with open('./AcademicEval/co_author/graph.pkl', 'rb') as f:
+        data = pickle.load(f)
 
-    # with open('./AcademicEval/co_author/graph_refine.pkl', 'rb') as f:
-    #     data = pickle.load(f)
-    # stats(data)
-    # data = chronological_split(data)
-    # write_to_pkl(data, "./AcademicEval/co_author/graph_refine.pkl")
-    # stats_single_len(data, setting="title")
-    # stats_multi_len(data, hop=2, setting="title")
-    # cora train/val/test index
+    data = refine_graph(data)
+    stats(data)
+    print(check_connectivity(data))
+    data = get_max_connect_part(data, node_idx=0)
+    print("\nFinal\n")
+    stats(data)
+    url_list = generate_download_data(data)
+    download(url_list)
+    data = integrate(data)
+    data = refine_graph(data)
+    stats(data)
+    print(check_connectivity(data))
+    data = get_max_connect_part(data, node_idx=0)
+    print("\nFinal\n")
+    stats(data)
+    write_to_pkl(data, "./AcademicEval/co_author/graph_refine.pkl")
+
+    with open('./AcademicEval/co_author/graph_refine.pkl', 'rb') as f:
+        data = pickle.load(f)
+    stats(data)
+    data = chronological_split(data)

@@ -95,7 +95,7 @@ def fetch_author_info(author, recall_num=100, max_co_author=20):
     return papers_info, co_authors
 
 
-def bfs(ROOT, author_list, save_interval=10, node_limit=9999999):
+def bfs(ROOT, author_list, save_interval=10, node_limit=999):
     SAVE_PATH = os.path.join(ROOT, "co_author")
     check_path(SAVE_PATH)
     graph = []
