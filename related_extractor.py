@@ -394,27 +394,4 @@ def get_related_titles(citations, refs):
 
 
 if __name__ == '__main__':
-    DIRECTORY = "./DatasetPapers"
-    for filename in os.listdir(DIRECTORY):
-        if not filename.endswith(".pdf"):
-            continue
-        if filename.find("MEMEX- Detecting Explanatory Evidence for Memes via Knowledge-Enriched Contextualization.pdf") == -1:
-            continue
-        pdf_path = os.path.join(DIRECTORY, filename)
-        cleaned_title = clean_title(filename)
-        print("{} Processing {}".format(show_time(), cleaned_title))
-
-        citations, refs, related_text = extract_related_and_ref(pdf_path)
-        refs = split_refs(refs)
-        refs = extract_refs_info(refs)
-        related_titles = get_related_titles(citations, refs)
-
-        print("{} Fetching Papers via API".format(show_time()))
-        file_name = f"{cleaned_title}.json"
-        status = fetch_original_arxiv(cleaned_title, file_name)
-        if not status:
-            fetch_original_scholar(cleaned_title, file_name)
-        fail_cases = fetch_related_papers_arxiv(related_titles, file_name)
-        fetch_related_papers_scholar(fail_cases, file_name)
-        finish_dataset(file_name)
-        print(text_wrap("=" * len("{} Processing {}".format(show_time(), cleaned_title))))
+    pass

@@ -458,9 +458,7 @@ def construct_long_task2(data):
                 paper_total = stats(additional_graph_info)
                 if paper_total < 2:
                     additional_graph_info = {}
-            # 检查filled每个graph在具体setting下是否满足paper篇数要求（除自己id的那篇外），若满足则留下，不满足则置空后删原文件。
         else:
-            # 所有graph_info为空的文件反向删除对应setting short long的文件
             additional_graph_info = {}
 
 
